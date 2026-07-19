@@ -1,7 +1,9 @@
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class MainClass {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("==== ZENON BANK - TALKING OVER THE WORLD WITH JAVA ====");
 
         Transaction t1 =  new Transaction(1,TransactionType.PAYMENT,new BigDecimal("9839.64"),
@@ -13,8 +15,13 @@ public class MainClass {
                 new TransactionCustomer("C1280323807",new BigDecimal("850002.52"),new BigDecimal("0.0")),
                 new TransactionCustomer("C873221189",new BigDecimal("6510099.11"),new BigDecimal("7360101.63")),
                 true,false);
-        IO.println(t1);
-        IO.println(t2);
+        //IO.println(t1);
+        //IO.println(t2);
+
+        TransactionIngestor transactionIngestor = new TransactionIngestor();
+        List<Transaction> transactions = transactionIngestor.readNew("data/PS_20174392719_1491204439457_log.csv");
+        transactions.stream().limit(10).forEach(IO::println);
+
     }
 
 }
