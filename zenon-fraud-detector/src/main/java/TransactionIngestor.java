@@ -4,36 +4,31 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class TransactionIngestor {
 
 
 
-    public List<Transaction> readNew(String filename) throws IOException {
-
-        List<Transaction> transactions = new ArrayList<>();
+    public List<Optional<Transaction>> readNew(String filename) throws IOException {
 
         Path path = Path.of(filename);
 
         List<String> lines = Files.readAllLines(path);
 
-        List<Transaction> list = lines.stream()
+        return lines.stream()
                 .skip(1)
                 .limit(1000)
-                .map(this::parseTransaction).toList();
+                .map(this::parseTransaction)
+                .filter(Optional::isPresent)
 
-        return list;
+                .toList();
     }
 
 
-    public List<Transaction> readOld(String filename) {
+    public List<Optional<Transaction>> readOld(String filename) {
 
-        List<Transaction> transactions = new ArrayList<>();
+        List<Optional<Transaction>> transactions = new ArrayList<>();
 
         try (FileInputStream fis = new FileInputStream(filename);
              Scanner scanner = new Scanner(fis)) {
@@ -48,7 +43,7 @@ public class TransactionIngestor {
                 if (lineCount == 1001) {
                     break;
                 }
-                Transaction transaction = parseTransaction(line);
+                Optional<Transaction> transaction = parseTransaction(line);
                 transactions.add(transaction);
 
             }
@@ -61,17 +56,32 @@ public class TransactionIngestor {
         return transactions;
     }
 
-    private Transaction parseTransaction(String line) {
+    private Optional<Transaction> parseTransaction(String line) {
+        try {
+
         String[] chunks = line.split(",");
         int step = Integer.parseInt(chunks[0]);
         TransactionType type = TransactionType.valueOf(chunks[1]);
+
+        if (chunks[2] == null || chunks[2].isEmpty()) throw new IllegalArgumentException("Amount is null or empty: " + chunks[2]);
+
         BigDecimal amount = new BigDecimal(chunks[2]);
         TransactionCustomer origin = new TransactionCustomer(chunks[3], new BigDecimal(chunks[4]), new BigDecimal(chunks[5]));
         TransactionCustomer recipient = new TransactionCustomer(chunks[6], new BigDecimal(chunks[7]), new BigDecimal(chunks[8]));
         boolean isFraud = "1".equals(chunks[9]);
         boolean isFlaggedFraud = "1".equals(chunks[10]);
 
-        return new Transaction(step, type, amount, origin, recipient, isFraud, isFlaggedFraud);
+        return Optional.of(new Transaction(step, type, amount, origin, recipient, isFraud, isFlaggedFraud));
+
+        }
+        catch (Exception e) {
+            System.err.println("Erro ao ao fazer o parse: " + line + " - " + e.getMessage());
+            //e.printStackTrace();
+
+            return Optional.empty();
+
+
+        }
 
     }
 }
