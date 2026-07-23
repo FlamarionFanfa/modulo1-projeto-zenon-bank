@@ -12,8 +12,8 @@ public TransactionCustomer{
     Objects.requireNonNull(newBalance);
 
     if (name == null || name.isEmpty()) throw new IllegalArgumentException("Name is null or empty: " + name);
-    if (oldBalance.compareTo(newBalance) > 0) throw new IllegalArgumentException("Old balance must be less than or equal to new balance: ");
-    if (newBalance.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("New balance must be positive: " );
+    //if (oldBalance.compareTo(newBalance) > 0) throw new IllegalArgumentException("Old balance must be less than or equal to new balance: ");
+   // if (newBalance.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("New balance must be positive: " );
 }
 
 }

@@ -1,5 +1,6 @@
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 
 public record Transaction(
         int step,
@@ -19,5 +20,8 @@ public record Transaction(
 
               if (step < 0) throw new IllegalArgumentException("Step must be positive: " + step);
               if (amount.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Amount must be positive: " + amount);
-                          }
+
+    }
+
+
 }

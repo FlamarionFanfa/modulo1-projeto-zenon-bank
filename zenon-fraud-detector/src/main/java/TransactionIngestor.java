@@ -6,23 +6,39 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+
+
 public class TransactionIngestor {
 
 
 
-    public List<Optional<Transaction>> readNew(String filename) throws IOException {
+    public List<Transaction> readNew(String filename) throws IOException {
 
         Path path = Path.of(filename);
+
+        int FRAUD_LIMITED = 50000;
 
         List<String> lines = Files.readAllLines(path);
 
         return lines.stream()
                 .skip(1)
-                .limit(1000)
+                .limit(FRAUD_LIMITED)
                 .map(this::parseTransaction)
-                .filter(Optional::isPresent)
-
+                .flatMap(Optional::stream)
                 .toList();
+
+
+//        return lines.stream()
+//                .skip(1)
+//                .limit(50000)
+//                .map(this::parseTransaction)
+//                .flatMap(Optional::stream)
+//                .filter(Transaction::isFraud)
+//                .toList();
+
+
+
+
     }
 
 
