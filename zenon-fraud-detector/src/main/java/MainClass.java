@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+
 
 public class MainClass {
     public static void main(String[] args) throws IOException {
@@ -31,7 +31,7 @@ public class MainClass {
         List<String> topSuspiciousClients = fraudAnalyzer.findTopSuspiciousClients(5);
         topSuspiciousClients.stream().forEach(IO::println);
 
-        //somando os valores dos frauds
+        //sum of all transactions of clients suspicious
         BigDecimal total = transactions.stream().map(Transaction::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
         System.out.println(total);
 
