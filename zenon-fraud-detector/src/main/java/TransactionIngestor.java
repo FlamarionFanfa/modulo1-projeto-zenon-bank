@@ -16,7 +16,7 @@ public class TransactionIngestor {
 
         Path path = Path.of(filename);
 
-        int FRAUD_LIMITED = 50000;
+        int FRAUD_LIMITED = 100_000;
 
         List<String> lines = Files.readAllLines(path);
 

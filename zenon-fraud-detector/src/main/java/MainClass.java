@@ -1,5 +1,8 @@
+import javax.swing.*;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +44,29 @@ public class MainClass {
         Map<TransactionType, Long> countFraudsByType = fraudAnalyzer.countFraudsByType();
         countFraudsByType.forEach((type, count) -> System.out.println(type + ": " + count));
 
+        System.out.println("==== Finding a transaction by name ====");
+
+        TransactionRepository transactionListRepository = new TransactionListRepository(transactions);
+        TransactionRepository transactionMapRepository = new TransactionMapRepository(transactions);
+
+
+        long startTimeList                ;
+        long endTimeList;
+
+        startTimeList = System.nanoTime();
+        transactionListRepository.findByOriginName("C1868032458").ifPresentOrElse(IO::println, () -> System.out.println("Not found customer"));
+        endTimeList = System.nanoTime();
+        System.out.println("Time using List: " + (endTimeList - startTimeList));
+
+
+        //Time to find a transaction by name using a map
+        System.out.println("Time to find a transaction by name using a map: ");
+        startTimeList = System.nanoTime();
+        transactionMapRepository.findByOriginName("C1868032458").ifPresentOrElse(IO::println,()-> System.out.println("Not found customer"));
+        endTimeList = System.nanoTime();
+        System.out.println("Time using Map: " + (endTimeList - startTimeList));
+
+
 
 
 
@@ -48,7 +74,5 @@ public class MainClass {
     }
 
 
-
-
-    }
+}
 
