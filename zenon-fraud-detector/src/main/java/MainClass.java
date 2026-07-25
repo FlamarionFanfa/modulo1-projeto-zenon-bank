@@ -15,7 +15,7 @@ public class MainClass {
         TransactionIngestor transactionBadData = new TransactionIngestor();
 
         List<Transaction> transactions = transactionBadData.readNew("data/PS_20174392719_1491204439457_log.csv");
-        transactions.stream().limit(1000).forEach(IO::println);
+        transactions.stream().limit(10).forEach(IO::println);
         System.out.println(transactions.size());
 
         //Usando o FraudAnalyzer para contar os frauds

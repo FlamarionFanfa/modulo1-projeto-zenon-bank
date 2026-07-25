@@ -1,5 +1,4 @@
 import java.io.FileInputStream;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -26,18 +25,6 @@ public class TransactionIngestor {
                 .map(this::parseTransaction)
                 .flatMap(Optional::stream)
                 .toList();
-
-
-//        return lines.stream()
-//                .skip(1)
-//                .limit(50000)
-//                .map(this::parseTransaction)
-//                .flatMap(Optional::stream)
-//                .filter(Transaction::isFraud)
-//                .toList();
-
-
-
 
     }
 
