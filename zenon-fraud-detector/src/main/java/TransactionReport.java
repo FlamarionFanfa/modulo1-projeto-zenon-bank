@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,38 +13,46 @@ public class TransactionReport {
 
 
     public record Statistics(long totalTransactions, long totalFrauds, BigDecimal totalAmount) {
-    }
+        public Statistics combine(Statistics other) {
+            return new Statistics(
+                    this.totalTransactions + other.totalTransactions,
+                    this.totalFrauds + other.totalFrauds,
+                    this.totalAmount.add(other.totalAmount)
+            );
+        }
 
+        public Statistics accumulate(ReportTransaction rt) {
+            return new Statistics(
+                    totalTransactions + 1,
+                    totalFrauds + (rt.isFraud() ? 1 : 0),
+                    totalAmount.add(rt.amount())
+            );
+        }
+    }
 
     public Statistics generateReport(String filename) {
         Path path = Path.of(filename);
         try (Stream<String> lines = Files.lines(path)) {
-
             return lines
                     .skip(1)
                     .map(this::parseTransaction)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .reduce(
                             new Statistics(0, 0, BigDecimal.ZERO),
-                            (Statistics acc, ReportTransaction rt) -> new Statistics(
-                                    acc.totalTransactions + 1,
-                                    acc.totalFrauds + (rt.isFraud ? 1 : 0),
-                                    acc.totalAmount.add(rt.amount)), (s1, s2) -> s1);
-
-
-
+                            Statistics::accumulate,
+                            Statistics::combine
+                    );
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao ler o arquivo" + e);
+            throw new UncheckedIOException("Erro ao ler o arquivo: " + filename, e);
         }
-
-
     }
 
     private Optional<ReportTransaction> parseTransaction(String line) {
         try {
-
             String[] chunks = line.split(",");
+            if (chunks.length < 11) {
+                throw new IllegalArgumentException("Linha com formato inválido: " + line);
+            }
             if (chunks[2] == null || chunks[2].isEmpty())
                 throw new IllegalArgumentException("Amount is null or empty: " + chunks[2]);
             BigDecimal amount = new BigDecimal(chunks[2]);
@@ -52,14 +61,7 @@ public class TransactionReport {
         } catch (Exception e) {
             System.err.println("Erro ao ao fazer o parse: " + line + " - " + e.getMessage());
             //e.printStackTrace();
-
             return Optional.empty();
-
-
         }
-
-
     }
 }
-
-
