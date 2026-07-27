@@ -11,7 +11,6 @@ public class TransactionReport {
     public record ReportTransaction(BigDecimal amount, boolean isFraud) {
     }
 
-
     public record Statistics(long totalTransactions, long totalFrauds, BigDecimal totalAmount) {
         public Statistics combine(Statistics other) {
             return new Statistics(
@@ -51,7 +50,7 @@ public class TransactionReport {
         try {
             String[] chunks = line.split(",");
             if (chunks.length < 11) {
-                throw new IllegalArgumentException("Linha com formato inválido: " + line);
+                throw new IllegalArgumentException("Lines with error of formatted " + line);
             }
             if (chunks[2] == null || chunks[2].isEmpty())
                 throw new IllegalArgumentException("Amount is null or empty: " + chunks[2]);
