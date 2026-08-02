@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,12 @@ public class TransactionMapRepository implements TransactionRepository{
 
     }
 
+
+    @Override
+    public void save(Transaction transaction) throws SQLException {
+        transactionsByOriginName.putIfAbsent(transaction.origin().name(), transaction);
+
+    }
 
     @Override
     public Optional<Transaction> findByOriginName(String name) {

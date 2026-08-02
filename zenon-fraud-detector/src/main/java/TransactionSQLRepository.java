@@ -6,6 +6,45 @@ import java.util.Optional;
 
 public class TransactionSQLRepository implements TransactionRepository{
     @Override
+    public void save(Transaction transaction) throws SQLException {
+        String sql = """
+                insert into
+                zenon_frauds.transactions
+                (step, `type`, amount, nome_origin, 
+                old_balance_origin, new_balance_origin, 
+                name_recipient, old_balance_recipient, 
+                new_balance_recipient, is_fraud, is_flagged_fraud)
+                values
+                (?,?,?,?,?,?,?,?,?,?,?);
+                """;
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1,transaction.step());
+            ps.setString(2,transaction.type().name());
+            ps.setBigDecimal(3,transaction.amount());
+
+            ps.setString(4,transaction.origin().name());
+            ps.setBigDecimal(5,transaction.origin().oldBalance());
+            ps.setBigDecimal(6,transaction.origin().newBalance());
+
+            ps.setString(7,transaction.recipient().name());
+            ps.setBigDecimal(8,transaction.recipient().oldBalance());
+            ps.setBigDecimal(9,transaction.recipient().newBalance());
+
+            ps.setBoolean(10, transaction.isFraud());
+            ps.setBoolean(11, transaction.isFlaggedFraud());
+
+            ps.execute();
+
+        }catch (SQLException e){
+            throw new RuntimeException("Error find transaction",e);
+
+        }
+
+
+    }
+
+    @Override
     public Optional<Transaction> findByOriginName(String originName) throws SQLException {
         String sql = """
                 SELECT step, `type`, amount, nome_origin,

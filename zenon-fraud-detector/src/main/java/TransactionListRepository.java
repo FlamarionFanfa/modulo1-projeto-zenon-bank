@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -9,6 +10,11 @@ public class TransactionListRepository implements TransactionRepository {
     public TransactionListRepository(List<Transaction> transactions) {
         Objects.requireNonNull(transactions);
         this.transactions = transactions;
+    }
+
+    @Override
+    public void save(Transaction transaction) throws SQLException {
+        this.transactions.add(transaction);
     }
 
     @Override
