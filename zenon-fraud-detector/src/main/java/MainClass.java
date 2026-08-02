@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 
 public class MainClass {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
         System.out.println("==== ZENON BANK - TALKING OVER THE WORLD WITH JAVA ====");
 
 
@@ -21,13 +22,13 @@ public class MainClass {
         transactions.stream().limit(10).forEach(IO::println);
         System.out.println(transactions.size());
 
-        //Usando o FraudAnalyzer para contar os frauds
+        //Using the FraudAnalyzer to count at frauds
         System.out.println("==== Frauds ====");
         FraudAnalyzer fraudAnalyzer = new FraudAnalyzer(transactions);
         long l = fraudAnalyzer.countFrauds();
         System.out.println("Frauds: " + l);
 
-        //Using the FraudAnalyzer to count the and find High Value of amount Frauds with limit 3
+        //Using the FraudAnalyzer to count and find High Value of amount Frauds with limit 3
         System.out.println("High Value Frauds: ");
         List<Transaction> findHigh = fraudAnalyzer.findHighValueFrauds(3);
         findHigh.stream().map(Transaction::amount).forEach(IO::println);
@@ -70,11 +71,7 @@ public class MainClass {
         System.out.println("Time using Map: " + (endTimeList - startTimeList));
 
 
-
-
-
-
-    }
+  }
 
     private static String resolveDataFile(String fileName) {
         Path moduleRelative = Path.of("data", fileName);

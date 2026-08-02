@@ -15,7 +15,7 @@ public class TransactionIngestor {
     public List<Transaction> readNew(String filename) throws IOException {
 
         Path path = Path.of(filename);
-        final int FRAUD_LIMITED = 100_000;
+        final int FRAUD_LIMITED = 100;
 
         try (Stream<String> lines = Files.lines(path)) {
             return lines
