@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 
 
@@ -14,17 +15,16 @@ public class TransactionIngestor {
     public List<Transaction> readNew(String filename) throws IOException {
 
         Path path = Path.of(filename);
+        final int FRAUD_LIMITED = 100_000;
 
-        int FRAUD_LIMITED = 100_000;
-
-        List<String> lines = Files.readAllLines(path);
-
-        return lines.stream()
-                .skip(1)
-                .limit(FRAUD_LIMITED)
-                .map(this::parseTransaction)
-                .flatMap(Optional::stream)
-                .toList();
+        try (Stream<String> lines = Files.lines(path)) {
+            return lines
+                    .skip(1)
+                    .limit(FRAUD_LIMITED)
+                    .map(this::parseTransaction)
+                    .flatMap(Optional::stream)
+                    .toList();
+        }
 
     }
 
@@ -63,6 +63,9 @@ public class TransactionIngestor {
         try {
 
         String[] chunks = line.split(",");
+        if (chunks.length < 11) {
+            throw new IllegalArgumentException("Line with invalid format: " + line);
+        }
         int step = Integer.parseInt(chunks[0]);
         TransactionType type = TransactionType.valueOf(chunks[1]);
 

@@ -1,0 +1,2 @@
+public class TransactionalSQLRepository {
+}

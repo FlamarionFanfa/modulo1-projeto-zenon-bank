@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
@@ -13,8 +15,9 @@ public class MainClass {
 
 
         TransactionIngestor transactionBadData = new TransactionIngestor();
+        String dataFile = resolveDataFile("PS_20174392719_1491204439457_log.csv");
 
-        List<Transaction> transactions = transactionBadData.readNew("data/PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactions = transactionBadData.readNew(dataFile);
         transactions.stream().limit(10).forEach(IO::println);
         System.out.println(transactions.size());
 
@@ -73,6 +76,18 @@ public class MainClass {
 
     }
 
+    private static String resolveDataFile(String fileName) {
+        Path moduleRelative = Path.of("data", fileName);
+        if (Files.exists(moduleRelative)) {
+            return moduleRelative.toString();
+        }
 
+        Path repoRelative = Path.of("..", "data", fileName);
+        if (Files.exists(repoRelative)) {
+            return repoRelative.toString();
+        }
+
+        throw new IllegalArgumentException("Data file not found: " + fileName);
+    }
 }
 
