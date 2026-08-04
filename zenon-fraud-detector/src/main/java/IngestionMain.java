@@ -11,24 +11,29 @@ import java.util.concurrent.Executors;
 public class IngestionMain {
 
     private static final String DEFAULT_DATA_FILE = "PS_20174392719_1491204439457_log.csv";
+    private static final String SCENARIO_TO_RUN = "full-benchmark";
+    private static final int DEFAULT_THREAD_COUNT = Math.max(8, Runtime.getRuntime().availableProcessors());
 
     public static void main(String[] args) throws Exception {
         String dataFile = resolveDataFile(args.length > 0 ? args[0] : DEFAULT_DATA_FILE);
         TransactionSQLRepository repository = new TransactionSQLRepository();
-        String mode = args.length > 1 ? args[1] : "all";
+        String mode = args.length > 1 ? args[1] : SCENARIO_TO_RUN;
+        int threadCount = args.length > 2 ? Integer.parseInt(args[2]) : DEFAULT_THREAD_COUNT;
 
         System.out.println("Banco de dados conectado!");
         System.out.println("Arquivo usado: " + dataFile);
+        System.out.println("Threads configuradas: " + threadCount);
         System.out.println();
 
         switch (mode) {
             case "single" -> runSingleInsertScenario(repository, dataFile);
             case "limited-batch" -> runLimitedBatchScenario(repository, dataFile);
-            case "full" -> runFullBatchScenarios(repository, dataFile);
+            case "full" -> runFullBatchScenario(repository, dataFile, threadCount);
+            case "full-benchmark" -> runFullBatchBenchmarks(repository, dataFile);
             default -> {
                 runSingleInsertScenario(repository, dataFile);
                 runLimitedBatchScenario(repository, dataFile);
-                runFullBatchScenarios(repository, dataFile);
+                runFullBatchScenario(repository, dataFile, threadCount);
             }
         }
     }
@@ -104,7 +109,34 @@ public class IngestionMain {
         );
     }
 
-    private static void runFullBatchScenarios(TransactionSQLRepository repository, String dataFile)
+    private static void runFullBatchScenario(
+            TransactionSQLRepository repository,
+            String dataFile,
+            int threadCount
+    ) throws IOException, SQLException {
+        System.out.println("Calculando estatisticas esperadas do arquivo completo...");
+        TransactionReport.Statistics expected = new TransactionReport().generateReport(dataFile);
+        System.out.println("Iniciando cenario: Batch JDBC arquivo completo [fixed:" + threadCount + "]");
+        repository.deleteAll();
+
+        long start = System.nanoTime();
+        long processed;
+        ProgressTracker tracker = new ProgressTracker("Lotes concluidos [fixed:" + threadCount + "]");
+        try (EfficientTransactionIngestor ingestor = new EfficientTransactionIngestor(threadCount)) {
+            processed = ingestor.readBatch(dataFile, batch -> saveBatchWithProgress(repository, batch, tracker));
+        }
+
+        long elapsed = System.nanoTime() - start;
+        printScenario(
+                "Batch JDBC arquivo completo [fixed:" + threadCount + "]",
+                processed,
+                elapsed,
+                expected,
+                repository.calculateStatistics()
+        );
+    }
+
+    private static void runFullBatchBenchmarks(TransactionSQLRepository repository, String dataFile)
             throws IOException, SQLException {
         System.out.println("Calculando estatisticas esperadas do arquivo completo...");
         TransactionReport.Statistics expected = new TransactionReport().generateReport(dataFile);
